@@ -9,7 +9,8 @@
 #import "MCFolderTableViewController.h"
 
 @interface MCFolderTableViewController () <WSAssetPickerControllerDelegate>{
-    MCAppDelegate *appDlegate;
+    MCAppDelegate *appDelegate;
+    NSIndexPath *selectedIndexPath;
 }
 
 @property (nonatomic, strong) ALAssetsLibrary *assetsLibrary;
@@ -48,8 +49,8 @@
     [super viewDidLoad];
     
     // Inherite managed object context for fetchedResultController
-    appDlegate = (MCAppDelegate *)[[UIApplication sharedApplication] delegate];
-    self.managedObjectContext = appDlegate.managedObjectContext;
+    appDelegate = (MCAppDelegate *)[[UIApplication sharedApplication] delegate];
+    self.managedObjectContext = appDelegate.managedObjectContext;
     
     self.navigationItem.rightBarButtonItem = self.editButtonItem;
     
@@ -111,7 +112,7 @@
     [cell setAccessoryType:UITableViewCellAccessoryDisclosureIndicator];
     
     Album_ *album = [self.fetchedResultsController objectAtIndexPath:indexPath];
-    [cell.textLabel setText:album.name];
+    [cell.textLabel setText:[NSString stringWithFormat:@"%@ (%i)", album.name, [[album.photosInAlbum allObjects] count]]];
     
     //Image Thumbnail
     NSString *posterUrl = @"";
@@ -139,7 +140,9 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    
+    selectedIndexPath = indexPath;
+    [self performSegueWithIdentifier:@"SelectAlbum" sender:nil];
+
     //self.pickerController = [[WSAssetPickerController alloc] initWithDelegate:self withAlbumName:album.name];
     //[self presentViewController:self.pickerController animated:YES completion:NULL];
 }
@@ -405,5 +408,16 @@
     }];
 }
 
+#pragma mark - Segue
+
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    if ([segue.identifier isEqualToString:@"SelectAlbum"]) {
+        MCAlbumViewController *albumViewController = [segue destinationViewController];
+        albumViewController.managedObjectContext = appDelegate.managedObjectContext;
+        albumViewController.albumIndexPath = selectedIndexPath;
+        albumViewController.fetchedResultsController = nil;
+    }
+}
 
 @end

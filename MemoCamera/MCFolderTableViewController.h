@@ -16,6 +16,7 @@
 #import "Photo.h"
 #import "WSAssetPicker.h"
 #import "Photo_.h"
+#import "MCAlbumViewController.h"
 
 typedef void (^DidSelectImagesForAlbumBlock)(NSArray *assets);
 
